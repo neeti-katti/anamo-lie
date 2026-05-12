@@ -1,86 +1,230 @@
 import streamlit as st
 import pandas as pd
-from db_operations.py import get_user_logs
+from database.db_operations import get_user_logs
 
 # =========================================================
 # PAGE CONFIG
 # =========================================================
 
 st.set_page_config(
-    page_title="Anamo-Lie",
-    page_icon="🚨",
+    page_title="ANAMO-LIE // ARCADE EDITION",
+    page_icon="🕹️",
     layout="wide"
 )
 
 # =========================================================
-# CUSTOM CSS — AMONG US THEME
+# THE 80S ARCADE ENGINE (CLEAN VERSION)
+# =========================================================
+
+# =========================================================
+# THE 80S ARCADE ENGINE (FIXED)
 # =========================================================
 
 st.markdown("""
 <style>
 
-/* MAIN BACKGROUND */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Press+Start+2P&display=swap');
+
+/* MAIN APP */
 .stApp {
-    background-color: #0f172a;
-    color: white;
-    font-family: 'Trebuchet MS', sans-serif;
+
+    background: linear-gradient(
+        180deg,
+        #05010c 0%,
+        #1a0136 50%,
+        #2d0154 100%
+    );
+
+    color: #00ffff;
+
+    font-family: 'Orbitron', sans-serif;
+
+    overflow-x: hidden;
+}
+
+/* RETRO FLOOR GRID */
+.stApp::after {
+
+    content: "";
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 15vh;
+
+    background-image:
+        linear-gradient(
+            0deg,
+            transparent 24%,
+            rgba(255,0,255,.3) 25%,
+            rgba(255,0,255,.3) 26%,
+            transparent 27%,
+            transparent 74%,
+            rgba(255,0,255,.3) 75%,
+            rgba(255,0,255,.3) 76%,
+            transparent 77%,
+            transparent
+        ),
+
+        linear-gradient(
+            90deg,
+            transparent 24%,
+            rgba(255,0,255,.3) 25%,
+            rgba(255,0,255,.3) 26%,
+            transparent 27%,
+            transparent 74%,
+            rgba(255,0,255,.3) 75%,
+            rgba(255,0,255,.3) 76%,
+            transparent 77%,
+            transparent
+        );
+
+    background-size: 50px 50px;
+
+    z-index: 0;
+
+    transform: perspective(100px) rotateX(45deg);
+
+    pointer-events: none;
 }
 
 /* SIDEBAR */
 section[data-testid="stSidebar"] {
-    background-color: #111827;
+
+    background-color: #05010c;
+
+    border-right: 4px solid #ff00ff;
+
+    box-shadow: 5px 0px 15px #ff00ff;
 }
 
-/* MAIN TITLE */
+/* MAIN CONTENT */
+[data-testid="stVerticalBlock"] {
+
+    position: relative;
+
+    z-index: 5;
+}
+
+/* TITLES */
 .main-title {
-    font-size: 55px;
-    color: #ff4b4b;
+
+    font-family: 'Press Start 2P', cursive;
+
+    font-size: 40px;
+
     text-align: center;
-    font-weight: bold;
-    text-shadow: 0px 0px 20px red;
-    margin-bottom: 10px;
+
+    color: #ffffff;
+
+    text-shadow:
+        3px 3px #ff00ff,
+        -3px -3px #00ffff;
+
+    padding: 20px;
 }
 
-/* SUBTITLE */
 .subtitle {
+
     text-align: center;
-    color: #cbd5e1;
-    font-size: 20px;
-    margin-bottom: 40px;
+
+    color: #00ffff;
+
+    font-weight: bold;
+
+    text-transform: uppercase;
+
+    letter-spacing: 3px;
+
+    margin-bottom: 30px;
 }
 
-/* CARD */
-.custom-card {
-    background-color: #1e293b;
-    padding: 20px;
-    border-radius: 20px;
-    border: 2px solid #334155;
+/* RETRO CARDS */
+.pixel-card {
+
+    background: rgba(26, 1, 54, 0.9);
+
+    border: 3px solid #00ffff;
+
+    padding: 25px;
+
     margin-bottom: 20px;
+
+    box-shadow:
+        0 0 15px #00ffff,
+        inset 0 0 10px #00ffff;
 }
 
-/* CRITICAL CARD */
-.critical-card {
-    background-color: #2b0b0b;
-    padding: 20px;
-    border-radius: 20px;
-    border: 2px solid #ff4b4b;
-    box-shadow: 0px 0px 20px rgba(255,0,0,0.5);
+/* ALERT CARD */
+.danger-card {
+
+    background: rgba(50, 0, 0, 0.9);
+
+    border: 4px solid #ff0000;
+
+    padding: 25px;
+
     margin-bottom: 20px;
+
+    box-shadow: 0 0 30px #ff0000;
+
+    color: white;
+
+    text-align: center;
 }
 
 /* BUTTONS */
 .stButton > button {
-    background-color: #ff4b4b;
-    color: white;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
+
+    background-color: transparent;
+
+    color: #00ffff;
+
+    border: 2px solid #00ffff;
+
+    border-radius: 0px;
+
+    font-family: 'Press Start 2P', cursive;
+
+    font-size: 14px;
+
     padding: 10px 20px;
+
+    transition: 0.3s;
+
+    box-shadow: 4px 4px 0px #ff00ff;
 }
 
 .stButton > button:hover {
-    background-color: #ff0000;
-    color: white;
+
+    background-color: #00ffff;
+
+    color: black;
+
+    box-shadow: 0 0 20px #00ffff;
+}
+
+/* TEXT INPUT */
+.stTextInput input {
+
+    background-color: #1a0136 !important;
+
+    color: #ff00ff !important;
+
+    border: 2px solid #ff00ff !important;
+}
+
+/* DATAFRAME */
+[data-testid="stDataFrame"] {
+
+    border: 2px solid #00ffff;
+
+    background: #000;
 }
 
 </style>
@@ -90,10 +234,21 @@ section[data-testid="stSidebar"] {
 # SIDEBAR NAVIGATION
 # =========================================================
 
-st.sidebar.title("🚨 ANAMO-LIE")
+st.sidebar.markdown(
+    """
+    <h2 style='
+        color: #ff00ff;
+        font-family: "Press Start 2P";
+        font-size: 14px;
+    '>
+    🕹️ MENU SELECTION
+    </h2>
+    """,
+    unsafe_allow_html=True
+)
 
 page = st.sidebar.radio(
-    "Ship Navigation",
+    "Navigation",
     [
         "Welcome",
         "Live Detection",
@@ -103,7 +258,7 @@ page = st.sidebar.radio(
 )
 
 # =========================================================
-# SESSION STATE FOR SEARCH HISTORY
+# SESSION STATE
 # =========================================================
 
 if "search_history" not in st.session_state:
@@ -116,51 +271,43 @@ if "search_history" not in st.session_state:
 if page == "Welcome":
 
     st.markdown(
-        '<div class="main-title">🚨 WELCOME TO ANAMO-LIE 🚨</div>',
+        '<div class="main-title">ANAMO-LIE ARCADE</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
-        '<div class="subtitle">AI Powered Security Monitoring System Inspired by Among Us</div>',
+        '<div class="subtitle">AI LOGIN DEFENSE // SYSTEM STATUS: OPERATIONAL</div>',
         unsafe_allow_html=True
     )
 
-    st.markdown("""
-    <div class="custom-card">
+    st.markdown(
+        '''
+        <div class="pixel-card">
 
-    ## 👨‍🚀 About Anamo-Lie
+        <h2 style="
+            color:#ff00ff;
+            font-family: 'Press Start 2P';
+            font-size: 18px;
+        ">
+        🛰 MISSION OBJECTIVES
+        </h2>
 
-    Anamo-Lie is an AI-powered cybersecurity monitoring system designed to detect suspicious login behaviour and identify potential impostors inside the network.
+        <p>
+        • <b>LIVE RADAR:</b> Monitor crewmate logins in real-time.
+        </p>
 
-    This system continuously monitors:
-    - login behaviour
-    - unusual locations
-    - VPN/TOR activity
-    - impossible travel attacks
-    - brute force attempts
-    - malicious IP activity
+        <p>
+        • <b>DATA LOGS:</b> Access high-score threat history.
+        </p>
 
-    Security analysts can investigate users, monitor critical threats, and review suspicious activity in real time.
+        <p>
+        • <b>TERMINATE:</b> Identify and block critical impostors.
+        </p>
 
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="custom-card">
-
-    ## 🛰 Navigation Guide
-
-    ### 🔍 Live Detection
-    Investigate a specific crewmate and analyze their login behaviour.
-
-    ### 📜 Threat Logs
-    View previously investigated usernames and their activity.
-
-    ### ☠️ Critical Users
-    Monitor confirmed impostors and high-risk users requiring immediate action.
-
-    </div>
-    """, unsafe_allow_html=True)
+        </div>
+        ''',
+        unsafe_allow_html=True
+    )
 
 # =========================================================
 # LIVE DETECTION PAGE
@@ -169,24 +316,23 @@ if page == "Welcome":
 elif page == "Live Detection":
 
     st.markdown(
-        '<div class="main-title">🔍 LIVE DETECTION</div>',
+        '<div class="main-title">LIVE RADAR</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
-        '<div class="subtitle">Emergency Monitoring Console</div>',
+        '<div class="subtitle">SCANNING FOR ANOMALIES...</div>',
         unsafe_allow_html=True
     )
 
-    email = st.text_input("👨‍🚀 Enter Crewmate Email")
+    email = st.text_input("👨‍🚀 CREWMATE ID (EMAIL)")
 
-    analyze = st.button("🚨 Analyze User")
+    analyze = st.button("🚨 EXECUTE SCAN")
 
     if analyze and email:
 
         logs = get_user_logs(email)
 
-        # Save search history
         if email not in st.session_state.search_history:
             st.session_state.search_history.append(email)
 
@@ -195,8 +341,11 @@ elif page == "Live Detection":
             latest = logs[0]
 
             risk_score = latest["risk_score"]
+
             level = latest["level"]
+
             attack_type = latest["attack_type"]
+
             decision = latest["decision"]
 
             # =========================================================
@@ -205,100 +354,137 @@ elif page == "Live Detection":
 
             if level == "critical":
 
-                st.markdown(f"""
-                <div class="critical-card">
-                <h1>☠️ CONFIRMED IMPOSTOR DETECTED</h1>
-                <h3>{attack_type}</h3>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    f'''
+                    <div class="danger-card">
+                    <h1>☠️ IMPOSTOR DETECTED ☠️</h1>
+                    <h3>ATTACK TYPE: {attack_type}</h3>
+                    </div>
+                    ''',
+                    unsafe_allow_html=True
+                )
 
             elif level == "danger":
 
-                st.error(f"🔴 Dangerous Activity Detected — {attack_type}")
+                st.error(
+                    f"🔴 DANGER LEVEL HIGH — {attack_type}"
+                )
 
             elif level == "warning":
 
-                st.warning(f"🟡 Suspicious Crewmate Activity — {attack_type}")
+                st.warning(
+                    f"🟡 SUSPICIOUS BEHAVIOR — {attack_type}"
+                )
 
             else:
 
-                st.success("🟢 VERIFIED CREWMATE")
+                st.success("🟢 CREWMATE VERIFIED")
 
             # =========================================================
-            # TOP METRICS
+            # METRICS
             # =========================================================
 
             c1, c2, c3, c4 = st.columns(4)
 
-            c1.metric("Risk Score", f"{risk_score}/100")
-            c2.metric("Threat Level", level.upper())
-            c3.metric("Decision", decision)
-            c4.metric("Attack Type", attack_type)
+            c1.metric("RISK", f"{risk_score}%")
+
+            c2.metric("THREAT", level.upper())
+
+            c3.metric("RESULT", decision)
+
+            c4.metric("CLASS", attack_type)
 
             st.divider()
 
             # =========================================================
-            # LOGIN DETAILS
+            # DETAILS
             # =========================================================
 
             col1, col2 = st.columns(2)
 
             with col1:
 
-                st.subheader("📍 Login Details")
-
-                st.markdown(f"**👤 User:** `{email}`")
-                st.markdown(f"**🕐 Timestamp:** `{latest['timestamp']}`")
-                st.markdown(f"**🌍 Country:** `{latest['country']}`")
-                st.markdown(f"**🏙 City:** `{latest['city']}`")
-                st.markdown(f"**🌐 IP Address:** `{latest['ip_address']}`")
-                st.markdown(f"**🔒 VPN/TOR:** {'YES 🚩' if latest['is_vpn_tor'] else 'NO'}")
-                st.markdown(f"**❌ Failed Attempts:** `{latest['failed_attempts']}`")
-
-                login_result = (
-                    "✅ SUCCESS"
-                    if latest["success"]
-                    else "❌ FAILED"
+                st.markdown(
+                    '<div class="pixel-card">',
+                    unsafe_allow_html=True
                 )
 
-                st.markdown(f"**🔑 Login Result:** {login_result}")
+                st.subheader("📍 CO-ORDINATES")
+
+                st.markdown(f"**👤 ID:** `{email}`")
+
+                st.markdown(
+                    f"**🌍 LOC:** `{latest['city']}, {latest['country']}`"
+                )
+
+                st.markdown(
+                    f"**🌐 IP:** `{latest['ip_address']}`"
+                )
+
+                st.markdown(
+                    f"**🔒 TUNNEL:** {'VPN/TOR DETECTED 🚩' if latest['is_vpn_tor'] else 'CLEAN'}"
+                )
+
+                login_result = (
+                    "✅ PASS"
+                    if latest["success"]
+                    else "❌ FAIL"
+                )
+
+                st.markdown(
+                    f"**🔑 STATUS:** {login_result}"
+                )
+
+                st.markdown(
+                    "</div>",
+                    unsafe_allow_html=True
+                )
 
             with col2:
 
-                st.subheader("🧠 AI Threat Analysis")
+                st.markdown(
+                    '<div class="pixel-card">',
+                    unsafe_allow_html=True
+                )
+
+                st.subheader("🧠 CORE ANALYSIS")
 
                 st.info(
                     f"""
-                    Attack Type: {attack_type}
+                    AI RECOMMENDATION:
 
-                    Risk Score: {risk_score}/100
-
-                    Recommended Action:
                     {decision}
                     """
                 )
 
-                st.progress(min(risk_score, 100))
+                st.progress(
+                    min(risk_score, 100)
+                )
+
+                st.markdown(
+                    "</div>",
+                    unsafe_allow_html=True
+                )
 
             # =========================================================
-            # FULL LOGIN HISTORY
+            # LOGIN HISTORY
             # =========================================================
 
             st.divider()
 
-            st.subheader("📜 Full Login History")
-
-            df = pd.DataFrame(logs)
+            st.subheader("📜 DATA STREAM")
 
             st.dataframe(
-                df,
+                pd.DataFrame(logs),
                 use_container_width=True,
                 height=350
             )
 
         else:
 
-            st.error("No logs found for this crewmate.")
+            st.error(
+                "DATABASE ERROR: CREWMATE NOT FOUND."
+            )
 
 # =========================================================
 # THREAT LOGS PAGE
@@ -307,19 +493,15 @@ elif page == "Live Detection":
 elif page == "Threat Logs":
 
     st.markdown(
-        '<div class="main-title">📜 THREAT LOGS</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="subtitle">Previously Investigated Crewmates</div>',
+        '<div class="main-title">THREAT LOGS</div>',
         unsafe_allow_html=True
     )
 
     if st.session_state.search_history:
 
         history_df = pd.DataFrame({
-            "Investigated Users": st.session_state.search_history
+            "Investigated Users":
+            st.session_state.search_history
         })
 
         st.dataframe(
@@ -329,7 +511,9 @@ elif page == "Threat Logs":
 
     else:
 
-        st.info("No previous investigations yet.")
+        st.info(
+            "NO RECENT INVESTIGATIONS RECORDED."
+        )
 
 # =========================================================
 # CRITICAL USERS PAGE
@@ -338,31 +522,23 @@ elif page == "Threat Logs":
 elif page == "Critical Users":
 
     st.markdown(
-        '<div class="main-title">☠️ CRITICAL USERS</div>',
+        '<div class="main-title">CRITICAL USERS</div>',
         unsafe_allow_html=True
     )
 
     st.markdown(
-        '<div class="subtitle">Users Requiring Immediate Action</div>',
+        """
+        <div class="danger-card">
+
+        <h2>
+        🚨 ACTIVE THREAT MONITORING 🚨
+        </h2>
+
+        <p>
+        Waiting for direct backend handshake...
+        </p>
+
+        </div>
+        """,
         unsafe_allow_html=True
     )
-
-    st.markdown("""
-    <div class="critical-card">
-
-    <h2>🚨 ACTIVE THREAT MONITORING ENABLED 🚨</h2>
-
-    <p>
-    This section will display users classified as:
-    - danger
-    - critical
-    - blocked
-    - high risk
-    </p>
-
-    <p>
-    Waiting for backend integration from database team.
-    </p>
-
-    </div>
-    """, unsafe_allow_html=True)
