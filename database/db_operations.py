@@ -126,3 +126,28 @@ def get_all_logs():
     """, conn)
     conn.close()
     return df
+
+# =====================================
+# GET USER LOGIN HISTORY
+# =====================================
+
+def get_user_logs(email):
+
+    conn = sqlite3.connect(DB)
+
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM login_logs
+        WHERE email = ?
+        ORDER BY timestamp DESC
+    """, (email,))
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return [dict(row) for row in rows]
