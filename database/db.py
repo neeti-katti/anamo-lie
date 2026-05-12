@@ -1,4 +1,11 @@
 import sqlite3
+import pandas as pd
+
+# =====================================
+# IMPORT AI MODEL FUNCTION
+# =====================================
+
+
 
 # =====================================
 # CREATE DATABASE + TABLE
@@ -36,82 +43,12 @@ conn.close()
 
 
 # =====================================
-# TEMPORARY AI FUNCTION
-# (Replace later with real ML model)
-# =====================================
-
-def analyse_login(event):
-
-    risk_score = 0
-    reasons = []
-
-    # odd hour
-    if event["hour"] < 5:
-        risk_score += 20
-        reasons.append("Odd login hour")
-
-    # failed attempts
-    if event["failed_attempts"] > 5:
-        risk_score += 30
-        reasons.append("Multiple failed attempts")
-
-    # new device
-    if event["new_device"] == 1:
-        risk_score += 15
-        reasons.append("New device detected")
-
-    # new location
-    if event["new_location"] == 1:
-        risk_score += 15
-        reasons.append("New location detected")
-
-    # impossible travel
-    if event["geo_impossible"] == 1:
-        risk_score += 25
-        reasons.append("Impossible travel detected")
-
-    # VPN / TOR
-    if event["is_vpn_tor"] == 1:
-        risk_score += 20
-        reasons.append("VPN/TOR usage detected")
-
-    # IP reputation
-    if event["ip_reputation_score"] > 70:
-        risk_score += 20
-        reasons.append("Suspicious IP reputation")
-
-    # session too short
-    if event["session_duration_sec"] < 30:
-        risk_score += 10
-        reasons.append("Very short session duration")
-
-    # decision logic
-    if risk_score >= 70:
-        level = "HIGH"
-        decision = "ANOMALY"
-
-    elif risk_score >= 40:
-        level = "MEDIUM"
-        decision = "SUSPICIOUS"
-
-    else:
-        level = "LOW"
-        decision = "SAFE"
-
-    return {
-        "risk_score": risk_score,
-        "decision": decision,
-        "level": level,
-        "reasons": reasons
-    }
-
-
-# =====================================
 # SAVE LOGIN EVENT
 # =====================================
 
 def save_login(event):
 
+    # AI prediction
     result = analyse_login(event)
 
     conn = sqlite3.connect("database/login_logs.db")
@@ -160,6 +97,8 @@ def save_login(event):
     conn.close()
 
     print("Login event stored successfully!")
+
+    return result
 
 
 # =====================================
@@ -233,27 +172,75 @@ def fetch_recent_logs():
 
 
 # =====================================
-# TEST EVENT
+# EXPORT LOGS TO CSV
 # =====================================
 
-event = {
-    "hour": 3,
-    "failed_attempts": 12,
-    "new_device": 1,
-    "new_location": 1,
-    "geo_impossible": 1,
-    "ip_reputation_score": 90,
-    "is_vpn_tor": 1,
-    "session_duration_sec": 20
-}
+def export_logs_to_csv():
 
-save_login(event)
+    logs = fetch_logs()
 
-print("\nALL LOGS:")
-print(fetch_logs())
+    df = pd.DataFrame(logs)
 
-print("\nHIGH RISK LOGS:")
-print(fetch_high_risk())
+    df.to_csv("login_logs_export.csv", index=False)
 
-print("\nRECENT LOGS:")
-print(fetch_recent_logs())
+    print("Logs exported successfully!")
+
+    # =====================================
+# TEMPORARY AI FUNCTION
+# =====================================
+
+def analyse_login(event):
+
+    risk_score = 0
+    reasons = []
+
+    if event["hour"] < 5:
+        risk_score += 20
+        reasons.append("Odd login hour")
+
+    if event["failed_attempts"] > 5:
+        risk_score += 30
+        reasons.append("Multiple failed attempts")
+
+    if event["new_device"] == 1:
+        risk_score += 15
+        reasons.append("New device detected")
+
+    if event["new_location"] == 1:
+        risk_score += 15
+        reasons.append("New location detected")
+
+    if event["geo_impossible"] == 1:
+        risk_score += 25
+        reasons.append("Impossible travel detected")
+
+    if event["is_vpn_tor"] == 1:
+        risk_score += 20
+        reasons.append("VPN/TOR usage detected")
+
+    if event["ip_reputation_score"] > 70:
+        risk_score += 20
+        reasons.append("Suspicious IP reputation")
+
+    if event["session_duration_sec"] < 30:
+        risk_score += 10
+        reasons.append("Very short session duration")
+
+    if risk_score >= 70:
+        level = "HIGH"
+        decision = "ANOMALY"
+
+    elif risk_score >= 40:
+        level = "MEDIUM"
+        decision = "SUSPICIOUS"
+
+    else:
+        level = "LOW"
+        decision = "SAFE"
+
+    return {
+        "risk_score": risk_score,
+        "decision": decision,
+        "level": level,
+        "reasons": reasons
+    }
